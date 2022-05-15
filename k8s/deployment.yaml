@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: customer-management-ms
-        image: kvg99/customer_management_ms:v1
+        image: kvg99/customer_management_image:v1
         imagePullPolicy: Always
         ports:
         - containerPort: 4000
