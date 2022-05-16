@@ -24,7 +24,7 @@ mongoose
     console.log("DB Connection Failed - " + err);
   });
 
-app.get("/test", (req,res) => {res.send("Hello From TEST endpoint!")})  
+app.get("/test", (req,res) => {res.send("Hello From CTSE endpoint!")})  
 app.use("/api",customerRoutes);
 
 //event loop for server
