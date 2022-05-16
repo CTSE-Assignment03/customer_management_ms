@@ -3,7 +3,7 @@ const CustomerModel = require("./model");
 // find existing customers
 const findCustomerById = async (customerId, res) => {
   try {
-    const existingCustomer = await ProductModel.findOne({ customerId: customerId});
+    const existingCustomer = await CustomerModel.findOne({ customerId: customerId});
     return existingCustomer;
   } catch (error) {
     res.status(422).json({
@@ -31,7 +31,7 @@ exports.addCustomer = async (req, res) => {
         desc: "Cannot add customer - Customer Already Exists!",
       });
     } else {
-      const newCustomer = await ProductModel.create({
+      const newCustomer = await CustomerModel.create({
         name,
         address,
         email,
@@ -55,7 +55,7 @@ exports.addCustomer = async (req, res) => {
 // get all Customers
 exports.getAllCustomers = async (req, res) => {
   try {
-    const customers = await ProductModel.find();
+    const customers = await CustomerModel.find();
     res.status(200).send({
       customers,
     });
@@ -71,7 +71,7 @@ exports.getAllCustomers = async (req, res) => {
 exports.getCustomerById = async (req, res) => {
   const customerId = req.params.customerId;
   try {
-    const customer = await ProductModel.findOne({ customerId});
+    const customer = await CustomerModel.findOne({ customerId});
     res.status(200).send({
       customer,
     });
@@ -109,7 +109,7 @@ exports.updateCustomer = async (req, res) => {
     purchaseDate = undefined;
   }
   try {
-    const updatedCustomer = await ProductModel.findOneAndUpdate(
+    const updatedCustomer = await CustomerModel.findOneAndUpdate(
       { customerId },
       {
         $set: {
@@ -143,7 +143,7 @@ exports.updateCustomer = async (req, res) => {
 exports.deleteCustomer = async (req, res) => {
   const customerId = req.params.customerId;
   try {
-    await ProductModel.deleteOne({ customerId });
+    await CustomerModel.deleteOne({ customerId });
     res.status(202).json({ desc: "Customer deleted successfully" });
   } catch (error) {
     res.status(500).json({
