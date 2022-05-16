@@ -2,22 +2,56 @@ name: Docker Build Deploy
 on:
   push:
     branches: [ master ]
+env:
+   DEPLOYMENT_NAME: customer-deployment
+   PROJECT_ID: ctse-assignment-03
+   GKE_CLUSTER: ctse-assignment-03-cluster
+   GKE_ZONE: asia-south1-a
+   CONTAINER_NAME: customer-management-ms
+   CONTAINER_IMAGE_NAME: customer_management_image
+   DOCKER_USERNAME: kvg99
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+
     - name: run shell script
       run: echo commit hash is ${{ github.sha }}
+
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }} 
+
     - name: Build and push
       uses: docker/build-push-action@v2
       with:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/customer_management_image:${{ github.sha }}
+        tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.CONTAINER_IMAGE_NAME }}:${{ github.sha }}
+
+      #Authenticate GCP    
+    - id: "auth"
+      uses: "google-github-actions/auth@v0"
+      with:
+        credentials_json: "${{ secrets.GKE_SECRET_KEY }}"
+
+      # Setup gcloud CLI
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0
+
+      # Get the GKE credentials so we can deploy to the cluster
+    - run: |-
+        gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"  
+      
+      #Deploy 
+    - name: Execute Deployment
+      run: |-
+        kubectl apply -f ./k8s/deployment.yaml -f ./k8s/service.yaml
+        kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=$DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:${{ github.sha }}
+        kubectl rollout status deployment/$DEPLOYMENT_NAME
+        kubectl get services -o wide
